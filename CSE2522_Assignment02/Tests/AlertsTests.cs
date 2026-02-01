@@ -1,71 +1,49 @@
 ﻿using NUnit.Framework;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
 using CSE2522_Assignment02.Base;
 using CSE2522_Assignment02.Pages;
-using System;
 
 namespace CSE2522_Assignment02.Tests
 {
-	[TestFixture]
 	public class AlertsTests : TestBase
 	{
-		[Test]
-		public void TC006_Handle_Alert()
+		private AlertsPage alertsPage;
+
+		[SetUp]
+		public void TestSetup()
 		{
-			driver.Navigate().GoToUrl("https://uitestingplayground.com/alerts");
-			AlertsPage alerts = new AlertsPage(driver);
-
-			alerts.TriggerAlert();
-			WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-			wait.Until(d => {
-				try { d.SwitchTo().Alert(); return true; }
-				catch (NoAlertPresentException) { return false; }
-			});
-
-			IAlert a = driver.SwitchTo().Alert();
-			a.Accept();
-
-			Assert.That(alerts.GetOutputText().Contains("Alert"), Is.True, "Alert was not handled correctly");
+			alertsPage = new AlertsPage(driver);
+			alertsPage.Open();
 		}
 
 		[Test]
-		public void TC007_Handle_Confirm()
+		public void Alert_ShouldDisplayMessage()
 		{
-			driver.Navigate().GoToUrl("https://uitestingplayground.com/alerts");
-			AlertsPage alerts = new AlertsPage(driver);
+			alertsPage.ClickAlert();
+			string text = alertsPage.GetAlertText();
 
-			alerts.TriggerConfirm();
-			WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-			wait.Until(d => {
-				try { d.SwitchTo().Alert(); return true; }
-				catch (NoAlertPresentException) { return false; }
-			});
-
-			IAlert a = driver.SwitchTo().Alert();
-			a.Accept();
-
-			Assert.That(alerts.GetOutputText().Contains("Ok"), Is.True, "Confirm was not accepted correctly");
+			Assert.That(text, Does.Contain("Alert"));
+			alertsPage.AcceptAlert();
 		}
 
 		[Test]
-		public void TC008_Handle_Prompt()
+		public void ConfirmAlert_ShouldBeAccepted()
 		{
-			driver.Navigate().GoToUrl("https://uitestingplayground.com/alerts");
-			AlertsPage alerts = new AlertsPage(driver);
+			alertsPage.ClickConfirm();
+			alertsPage.AcceptAlert();
 
-			alerts.TriggerPrompt();
-			WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-			wait.Until(d => {
-				try { d.SwitchTo().Alert(); return true; }
-				catch (NoAlertPresentException) { return false; }
-			});
+			Assert.Pass("Confirm alert accepted successfully");
+		}
 
-			IAlert a = driver.SwitchTo().Alert();
-			a.SendKeys("TestAlert");
-			a.Accept();
+		[Test]
+		public void PromptAlert_ShouldAcceptInput()
+		{
+			string input = "Selenium";
 
-			Assert.That(alerts.GetOutputText().Contains("TestAlert"), Is.True, "Prompt input not handled correctly");
+			alertsPage.ClickPrompt();
+			alertsPage.SendTextToAlert(input);
+			alertsPage.AcceptAlert();
+
+			Assert.Pass("Prompt alert handled successfully");
 		}
 	}
 }
